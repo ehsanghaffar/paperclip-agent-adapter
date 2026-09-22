@@ -40,6 +40,9 @@ yarn-error.log*
 next-env.d.ts
 .DS_Store
 
+# build output
+/dist
+
 # prisma
 prisma/*.db
 prisma/*.db-journal
