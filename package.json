@@ -3,14 +3,38 @@
   "version": "1.0.0",
   "type": "module",
   "license": "MIT",
+  "description": "Paperclip adapter for custom OpenAI-compatible, OpenAI Responses, and Anthropic-compatible LLM endpoints",
   "author": {
     "name": "Ehsanghaffar",
     "url": "https://eindev.ir"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/paperclipai/paperclip",
+    "directory": "packages/adapters/custom"
+  },
+  "homepage": "https://github.com/paperclipai/paperclip/tree/main/packages/adapters/custom",
+  "bugs": {
+    "url": "https://github.com/paperclipai/paperclip/issues"
+  },
+  "keywords": [
+    "paperclip",
+    "adapter",
+    "llm",
+    "openai",
+    "anthropic",
+    "custom"
+  ],
+  "engines": {
+    "node": ">=24.11.0"
   },
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "scripts": {
     "build": "tsc -p tsconfig.json",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "test:watch": "vitest",
     "prepublishOnly": "npm run build"
   },
   "paperclip": {
@@ -25,12 +49,12 @@
   },
   "dependencies": {
     "@paperclipai/adapter-utils": "^2026.916.0",
-    "dotenv": "^18.0.2",
-    "vitest": "^5.0.1"
+    "picocolors": "^1.1.1"
   },
   "devDependencies": {
     "@types/node": "^26.6.2",
-    "typescript": "^5.7.3"
+    "typescript": "^5.7.3",
+    "vitest": "^5.0.1"
   },
   "files": [
     "dist"
