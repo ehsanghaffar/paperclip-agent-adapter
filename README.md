@@ -1,4 +1,4 @@
-# paperclip-custom-adapter
+# Paperclip Custom Adapter 
 
 Paperclip adapter for custom OpenAI-compatible, OpenAI Responses, and Anthropic-compatible LLM endpoints.
 
@@ -252,5 +252,5 @@ MIT License — see [LICENSE](LICENSE) for details.
 
 ## Support
 
-- Paperclip Documentation: https://paperclip.ai/docs
+- Paperclip Documentation: https://docs.paperclip.ing
 - Issues: https://github.com/paperclipai/paperclip/issues
