@@ -1,0 +1,73 @@
+# Source files (compiled output goes in dist/)
+src/
+*.ts
+!*.d.ts
+
+# Build config
+tsconfig.json
+tsconfig.*.json
+rollup.config.js
+tsup.config.ts
+webpack.config.js
+
+# Tests
+test/
+tests/
+__tests__/
+*.test.ts
+*.spec.ts
+*.test.js
+*.spec.js
+coverage/
+.nyc_output/
+jest.config.js
+jest.config.ts
+vitest.config.ts
+
+# Lint / format config
+.eslintrc
+.eslintrc.js
+.eslintrc.json
+.eslintignore
+.prettierrc
+.prettierrc.js
+.prettierignore
+.stylelintrc
+
+# CI / CD
+.github/
+.gitlab-ci.yml
+.travis.yml
+circle.yml
+azure-pipelines.yml
+
+# Editor / OS
+.vscode/
+.idea/
+*.swp
+.DS_Store
+Thumbs.db
+
+# Git
+.git/
+.gitignore
+.gitattributes
+
+# Lockfiles
+package-lock.json
+yarn.lock
+pnpm-lock.yaml
+
+# Logs
+*.log
+npm-debug.log*
+
+# Env / secrets
+.env
+.env.*
+*.pem
+*.key
+
+# Build artifacts you DON'T want shipped
+*.tsbuildinfo
+dist/**/*.map
