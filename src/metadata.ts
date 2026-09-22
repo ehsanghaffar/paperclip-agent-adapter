@@ -57,5 +57,5 @@ Core fields:
   default "chat/completions"): which custom endpoint to call.
 - baseUrl (string, default "https://example.com/v1"): override for testing
   against a staging host.
-- timeoutSec (number, default 120): request timeout.
+- requestTimeoutMs (number, default 30000): timeout for the HTTP request
 `;
