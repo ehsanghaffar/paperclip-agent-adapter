@@ -3,9 +3,6 @@ import { type, models,endpointPaths, agentConfigurationDoc, DEFAULT_BASE_URL } f
 import { execute } from "./execute.js";
 import { testEnvironment } from "./test.js";
 
-// my custom API is a stateless completion endpoint — no server-side session or
-// thread id to store or resume. Stubbed rather than omitted, in case the
-// host expects sessionCodec to always be present on the returned module.
 const sessionCodec: AdapterSessionCodec = {
   deserialize(_raw) {
     return null;
@@ -47,9 +44,6 @@ const configSchema: AdapterConfigSchema = {
       label: "Model",
       type: "select",
       default: "auto",
-      // options: [
-      //   { label: "Auto (recommended)", value: "auto" },
-      // ],
       options: modelsList,
       hint: "Passed as the request's model field.",
     },
@@ -69,10 +63,10 @@ const configSchema: AdapterConfigSchema = {
       hint: "Override for testing against a staging host.",
     },
     {
-      key: "timeoutSec",
-      label: "Timeout (seconds)",
+      key: "requestTimeoutMs",
+      label: "Request Timeout (ms)",
       type: "number",
-      default: 120,
+      default: 30000,
       hint: "Request timeout.",
     },
     {

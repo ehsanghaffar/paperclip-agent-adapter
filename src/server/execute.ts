@@ -76,7 +76,7 @@ export async function execute(ctx: AdapterExecutionContext): Promise<AdapterExec
       exitCode: 1,
       signal: null,
       timedOut: false,
-      errorMessage: "llm adapter: missing apiKey (set config.apiKey, or rely on the injected auth token)",
+      errorMessage: "adapter: missing apiKey (set config.apiKey, or rely on the injected auth token)",
       errorFamily: "provider_quota",
       provider: "custom",
       model,
@@ -89,7 +89,7 @@ export async function execute(ctx: AdapterExecutionContext): Promise<AdapterExec
       exitCode: 1,
       signal: null,
       timedOut: false,
-      errorMessage: "llm adapter: failed to render prompt template",
+      errorMessage: "adapter: failed to render prompt template",
       errorFamily: "transient_upstream",
       provider: "custom",
       model,
@@ -128,12 +128,12 @@ export async function execute(ctx: AdapterExecutionContext): Promise<AdapterExec
     const isAbort = err instanceof Error && err.name === "AbortError";
     const message = err instanceof Error ? err.message : String(err);
     isNetworkError = !isAbort;
-    await onLog("stderr", `llm adapter: fetch failed — ${message}\n`);
+    await onLog("stderr", `adapter: fetch failed — ${message}\n`);
     return {
       exitCode: 1,
       signal: null,
       timedOut: isAbort,
-      errorMessage: isAbort ? "llm adapter: request timed out" : message,
+      errorMessage: isAbort ? "adapter: request timed out" : message,
       errorFamily: classifyError(null, isAbort, isNetworkError),
       provider: "custom",
       model,
@@ -145,12 +145,12 @@ export async function execute(ctx: AdapterExecutionContext): Promise<AdapterExec
   await onLog("stdout", rawText + "\n");
 
   if (!res.ok) {
-    await onLog("stderr", `llm adapter: HTTP ${res.status}\n`);
+    await onLog("stderr", `adapter: HTTP ${res.status}\n`);
     return {
       exitCode: 1,
       signal: null,
       timedOut: false,
-      errorMessage: `llm adapter: HTTP ${res.status} — ${rawText.slice(0, 2000)}`,
+      errorMessage: `adapter: HTTP ${res.status} — ${rawText.slice(0, 2000)}`,
       errorFamily: classifyError(res.status, false, false),
       retryNotBefore: res.status === 429 ? new Date(Date.now() + 60_000).toISOString() : undefined,
       provider: "custom",
