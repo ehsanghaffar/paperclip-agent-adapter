@@ -41,7 +41,16 @@ export function parseStdoutLine(line: string, ts: string): TranscriptEntry[] {
 
     const text =
       (json.choices && json.choices[0] && json.choices[0].message && json.choices[0].message.content) ||
+      (json.choices && json.choices[0] && json.choices[0].text) ||
       json.output_text ||
+      (Array.isArray(json.output)
+        ? json.output
+            .flatMap((item: any) => (Array.isArray(item?.content) ? item.content : []))
+            .filter((c: any) => c?.type === "output_text" || c?.type === "text")
+            .map((c: any) => c?.text)
+            .filter((t: unknown) => typeof t === "string")
+            .join("")
+        : undefined) ||
       (Array.isArray(json.content)
         ? (json.content.find((c: any) => c && c.type === "text") || {}).text
         : undefined);
