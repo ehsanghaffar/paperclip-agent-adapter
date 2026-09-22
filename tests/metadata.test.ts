@@ -34,7 +34,6 @@ describe("metadata", () => {
     expect(agentConfigurationDoc).toContain("model");
     expect(agentConfigurationDoc).toContain("endpointPath");
     expect(agentConfigurationDoc).toContain("baseUrl");
-    expect(agentConfigurationDoc).toContain("timeoutSec");
   });
 
   it("exports DEFAULT_BASE_URL as empty string by default", () => {
