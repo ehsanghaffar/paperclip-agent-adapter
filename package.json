@@ -1,6 +1,6 @@
 {
   "name": "paperclip-custom-adapter",
-  "version": "1.0.0",
+  "version": "0.1.0",
   "type": "module",
   "license": "MIT",
   "description": "Paperclip adapter for custom OpenAI-compatible, OpenAI Responses, and Anthropic-compatible LLM endpoints",
@@ -10,18 +10,17 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/paperclipai/paperclip",
+    "url": "https://github.com/ehsanghaffar/paperclip-agent-adapter",
     "directory": "packages/adapters/custom"
   },
-  "homepage": "https://github.com/paperclipai/paperclip/tree/main/packages/adapters/custom",
   "bugs": {
-    "url": "https://github.com/paperclipai/paperclip/issues"
+    "url": "https://github.com/ehsanghaffar/paperclip-agent-adapter/issues"
   },
   "keywords": [
     "paperclip",
     "adapter",
     "llm",
-    "openai",
+    "custom-adapter",
     "anthropic",
     "custom"
   ],
