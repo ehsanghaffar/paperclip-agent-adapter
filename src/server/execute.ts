@@ -2,15 +2,7 @@ import type { AdapterExecutionContext, AdapterExecutionResult } from "@paperclip
 import type { AdapterExecutionErrorFamily } from "@paperclipai/adapter-utils/types";
 import { asString, asNumber, renderTemplate, DEFAULT_PAPERCLIP_AGENT_PROMPT_TEMPLATE } from "@paperclipai/adapter-utils/server-utils";
 import { parseProviderResponse, type EndpointType } from "./parse.js";
-import { config as loadEnv } from "dotenv";
-import path from "path";
-
-loadEnv({
-  path: path.resolve(process.cwd(), '.env')
-,
-})
-
-export const DEFAULT_BASE_URL = process.env.DEFAULT_BASE_URL || ""
+import { DEFAULT_BASE_URL } from "../metadata.js";
 const DEFAULT_ENDPOINT: EndpointType = "chat/completions";
 
 function resolveEndpoint(config: Record<string, unknown>): EndpointType {

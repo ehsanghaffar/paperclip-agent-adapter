@@ -3,14 +3,9 @@
 // dependency (index.ts re-exports createServerAdapter FROM server/index.ts,
 // so server/index.ts must not import metadata back from index.ts).
 
-import { config as loadEnv } from "dotenv";
-import path from "path";
-
-loadEnv({
-  path: path.resolve(process.cwd(), ".env"),
-});
-
-export const DEFAULT_BASE_URL = process.env.DEFAULT_BASE_URL || "";
+// DEFAULT_BASE_URL can be overridden via adapter config (baseUrl field)
+// or the DEFAULT_BASE_URL environment variable at runtime.
+export const DEFAULT_BASE_URL = "";
 
 export const type = "custom";
 export const label = "custom LLM";

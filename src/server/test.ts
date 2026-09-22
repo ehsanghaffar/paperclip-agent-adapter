@@ -4,15 +4,7 @@ import type {
   AdapterEnvironmentCheck,
 } from "@paperclipai/adapter-utils";
 import { asString } from "@paperclipai/adapter-utils/server-utils";
-import path from "path"
-import {config as loadEnv} from "dotenv"
-
-loadEnv({
-  path: path.resolve(process.cwd(), '.env')
-})
-
-
-const DEFAULT_BASE_URL = process.env.DEFAULT_BASE_URL || ""
+import { DEFAULT_BASE_URL } from "../metadata.js";
 
 /**
  * Validates config presence/shape only. Does not make live network calls
