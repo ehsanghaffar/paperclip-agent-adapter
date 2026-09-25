@@ -1,13 +1,3 @@
-// Self-contained UI parser for the your adapter, per Paperclip's
-// Adapter UI Parser Contract:
-//   - no runtime imports, no DOM access, no Node APIs
-//   - no top-level side effects
-//   - deterministic output for the same (line, ts)
-//   - never throw — fall back to a plain "stdout" entry
-//
-// execute.ts logs the raw your API response body as a single onLog("stdout", ...)
-// chunk, so each "line" this parser sees is typically one full JSON response.
-// A local type is used instead of an import so the module stays import-free.
 
 type TranscriptEntry =
   | { kind: "assistant"; ts: string; text: string; delta?: boolean }

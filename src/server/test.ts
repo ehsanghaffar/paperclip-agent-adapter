@@ -6,24 +6,19 @@ import type {
 import { asString } from "@paperclipai/adapter-utils/server-utils";
 import { DEFAULT_BASE_URL } from "../metadata.js";
 
-/**
- * Validates config presence/shape only. Does not make live network calls
- * per the skill guidance that testEnvironment should be "lightweight and side-effect free."
- * For live validation, use a separate "deep test" endpoint if needed.
- */
 export async function testEnvironment(
   ctx: AdapterEnvironmentTestContext,
 ): Promise<AdapterEnvironmentTestResult> {
   const checks: AdapterEnvironmentCheck[] = [];
-  const apiKey = asString(ctx.config.apiKey, "");
+  const apiKeyEnv = asString(ctx.config.apiKeyEnv, "");
   const baseUrl = asString(ctx.config.baseUrl, DEFAULT_BASE_URL);
 
-  if (!apiKey) {
+  if (!apiKeyEnv) {
     checks.push({
-      code: "custom_missing_apiKey",
+      code: "custom_missing_apiKeyEnv",
       level: "error",
-      message: "No API key configured for the custom adapter.",
-      hint: "Set config.apiKey, or confirm the injected Paperclip auth token is expected to authenticate to custom adapter.",
+      message: "No API key environment variable configured for the custom adapter.",
+      hint: "Set config.apiKeyEnv, or confirm the injected Paperclip auth token is expected to authenticate to custom adapter.",
     });
   } else {
     checks.push({

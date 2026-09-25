@@ -1,21 +1,17 @@
 import type { AdapterExecutionContext, AdapterExecutionResult } from "@paperclipai/adapter-utils";
 import type { AdapterExecutionErrorFamily } from "@paperclipai/adapter-utils/types";
-import { asString, asNumber, renderTemplate, DEFAULT_PAPERCLIP_AGENT_PROMPT_TEMPLATE } from "@paperclipai/adapter-utils/server-utils";
+import {
+  asString,
+  asNumber,
+  renderTemplate,
+  DEFAULT_PAPERCLIP_AGENT_PROMPT_TEMPLATE,
+} from "@paperclipai/adapter-utils/server-utils";
 import { parseProviderResponse, type EndpointType } from "./parse.js";
 import { DEFAULT_BASE_URL } from "../metadata.js";
-const DEFAULT_ENDPOINT: EndpointType = "chat/completions";
+import { parseConfig } from "./schema.js";
+import { buildErrorResult } from "./errors.js";
 
-function resolveEndpoint(config: Record<string, unknown>): EndpointType {
-  const ep = asString(config.endpointPath, DEFAULT_ENDPOINT);
-  if (ep === "responses" || ep === "messages") return ep;
-  return "chat/completions";
-}
-
-function buildRequestBody(
-  endpoint: EndpointType,
-  model: string,
-  promptText: string,
-): Record<string, unknown> {
+function buildRequestBody(endpoint: EndpointType, model: string, promptText: string): Record<string, unknown> {
   if (endpoint === "messages") {
     // Anthropic-compatible schema — max_tokens is required.
     return {
@@ -65,23 +61,24 @@ function classifyError(status: number | null, isTimeout: boolean, isNetworkError
 export async function execute(ctx: AdapterExecutionContext): Promise<AdapterExecutionResult> {
   const { config, onLog, onMeta, authToken, agent, runId } = ctx;
 
-  const apiKey = asString(config.apiKey, "") || authToken || "";
-  const model = asString(config.model, "auto");
-  const baseUrl = asString(config.baseUrl, DEFAULT_BASE_URL).replace(/\/+$/, "");
-  const timeoutSec = asNumber(config.timeoutSec, 120);
-  const endpoint = resolveEndpoint(config);
+  const parsedConfig = parseConfig(config);
 
-  if (!apiKey) {
-    return {
-      exitCode: 1,
-      signal: null,
-      timedOut: false,
-      errorMessage: "adapter: missing apiKey (set config.apiKey, or rely on the injected auth token)",
-      errorFamily: "provider_quota",
-      provider: "custom",
-      model,
-    };
+  let apiKey = "";
+  if (parsedConfig.apiKeyEnv) {
+    apiKey = process.env[parsedConfig.apiKeyEnv] || "";
+    if (!apiKey) {
+      return buildErrorResult({ code: "CONFIG_INVALID", message: `apiKeyEnv "${config.apiKeyEnv}" is not set or empty in server process environment`, meta: { envVar: parsedConfig.apiKeyEnv } });
+    }
   }
+  if (!apiKey && authToken) {
+    apiKey = authToken;
+  }
+
+  const endpoint = parsedConfig.endpoint;
+
+  const model = asString(parsedConfig.model, "auto");
+  const baseUrl = asString(parsedConfig.baseUrl, DEFAULT_BASE_URL).replace(/\/+$/, "");
+  const timeoutSec = asNumber(parsedConfig.requestTimeoutMs, 120);
 
   const promptText = buildPromptText(ctx);
   if (!promptText) {

@@ -1,54 +1,24 @@
 export const DEFAULT_BASE_URL = "";
 
-export const type = "custom";
+export const type = "custom_llm";
 export const label = "custom LLM";
-
-export const models = [
-  { id: "auto", label: "Auto (recommended)" },
-  { id: "nemotron-3-120b", label: "Nemotron 3 120B" },
-  { id: "dots3-note-preview", label: "Dots3 Note Preview" },
-  // add your own custom api models.
-];
-
-export const endpointPaths = [
-  { label: "Chat Completions (OpenAI)", value: "chat/completions" },
-  { label: "Responses (OpenAI)", value: "responses" },
-  { label: "Messages (Anthropic-compatible (Claude))", value: "messages" },
-  // add your custom endpoint
-];
+export const models = [];
 
 export const agentConfigurationDoc = `# custom agent configuration
 
-Adapter: custom
+# Custom LLM adapter
+ 
+this adapter allows you to connect to a custom LLM endpoint. It is compatible with the OpenAI API and Anthropic API, 
+but can also be used with any other LLM endpoint that follows the same request/response format.
 
-this llm is a hosted, stateless HTTP completion API (OpenAI-compatible chat/
-completions and responses endpoints, plus an Anthropic-compatible messages
-endpoint) at https://example.com/v1. It is not a local CLI agent runtime: it
-has no filesystem access, no confirmed tool use / function calling, and no
-server-side session or thread persistence.
 
-Use when:
-- The task is a single-shot (or manually-replayed-history) chat completion
-  against a hosted LLM behind one custom API key
-- You want "model": "auto" to let the backend choose the underlying model
-- You need to call an OpenAI-shaped, an OpenAI Responses-shaped, or an
-  Anthropic Messages-shaped endpoint through one adapter
+## configuration
+- *apiKeyEnv*: The name of the environment variable that contains your API key. For example, "MY_API_KEY". This is used to authenticate requests to your custom LLM endpoint.
+- *model*: The model ID to use for the request. For example, "gpt-4" or "claude-v1".
+- *baseUrl*: The base URL of your custom LLM endpoint. For example, "https://api.example.com/v1".
+- *requestTimeoutMs*: The request timeout in milliseconds. For example, 30000 for 30 seconds.
 
-Don't use when:
-- The task needs a local coding-agent runtime with filesystem/tool access
-  (use a local CLI adapter instead)
-- You need multi-turn conversation continuity guaranteed by the provider —
-  custom has no server-side session; continuity (if needed) must be
-  reconstructed client-side by replaying prior messages
 
-Core fields:
-- apiKey (string, required, secret): Bearer token sent as
-  \`Authorization: Bearer <apiKey>\`. Falls back to the injected Paperclip
-  auth token if omitted — never put this in a prompt template.
-- model (string, default "auto"): passed as the request's "model" field.
-- endpointPath (enum: "chat/completions" | "responses" | "messages",
-  default "chat/completions"): which custom endpoint to call.
-- baseUrl (string, default "https://example.com/v1"): override for testing
-  against a staging host.
-- requestTimeoutMs (number, default 30000): timeout for the HTTP request
+### Security
+Never put raw API keys in adapterConfig. Use \`apiKeyEnv\` to reference a server environment variable.
 `;

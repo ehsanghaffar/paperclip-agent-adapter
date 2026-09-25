@@ -1,13 +1,3 @@
-// Parses custom API response bodies into structured data.
-//
-// my adapter exposes three response shapes depending on which endpoint was called:
-//   - /v1/chat/completions -> OpenAI chat.completion shape
-//   - /v1/responses        -> OpenAI Responses shape
-//   - /v1/messages         -> Anthropic Messages shape
-//
-// Treat the response body as untrusted: only extract known fields
-// defensively, never eval/execute anything from it.
-
 export type EndpointType = "chat/completions" | "responses" | "messages";
 
 export interface ProviderUsage {
