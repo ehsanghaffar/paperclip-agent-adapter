@@ -1,10 +1,3 @@
-// Shared adapter metadata. Kept in its own file so src/index.ts and
-// src/server/index.ts can both import it without creating a circular
-// dependency (index.ts re-exports createServerAdapter FROM server/index.ts,
-// so server/index.ts must not import metadata back from index.ts).
-
-// DEFAULT_BASE_URL can be overridden via adapter config (baseUrl field)
-// or the DEFAULT_BASE_URL environment variable at runtime.
 export const DEFAULT_BASE_URL = "";
 
 export const type = "custom";
