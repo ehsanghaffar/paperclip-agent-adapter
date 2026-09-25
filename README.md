@@ -6,9 +6,9 @@ Paperclip adapter for custom OpenAI-compatible, OpenAI Responses, and Anthropic-
 
 This adapter allows Paperclip to connect to any LLM API that implements one of three standard endpoint shapes:
 
-- **OpenAI Chat Completions** (`/v1/chat/completions`) - The standard OpenAI chat completion format
-- **OpenAI Responses** (`/v1/responses`) - OpenAI's newer Responses API format
-- **Anthropic Messages** (`/v1/messages`) - Anthropic's Messages API format (Claude-compatible)
+- **OpenAI Chat Completions** (`chat/completions`) - The standard OpenAI chat completion format
+- **OpenAI Responses** (`responses`) - OpenAI's newer Responses API format
+- **Anthropic Messages** (`messages`) - Anthropic's Messages API format (Claude-compatible)
 
 The adapter is stateless — it makes a single HTTP request per execution with no server-side session persistence. Conversation continuity (if needed) must be reconstructed client-side by replaying prior messages.
 
@@ -26,27 +26,24 @@ npm install paperclip-custom-adapter
 
 ## Paperclip Setup
 
-1. In Paperclip, create a new agent with adapter type `custom`
+1. In Paperclip, create a new agent with adapter type `custom_llm`
 2. Configure the following fields:
 
 | Field | Type | Required | Default | Description |
 |-------|------|----------|---------|-------------|
-| `apiKey` | string (secret) | Yes | — | Bearer token sent as `Authorization: Bearer <apiKey>`. Falls back to injected Paperclip auth token if omitted. |
-| `model` | select | No | `auto` | Model identifier passed in the request body. |
 | `endpointPath` | select | No | `chat/completions` | Which endpoint to call: `chat/completions`, `responses`, or `messages`. |
-| `baseUrl` | string | No | `https://api.openai.com/v1` | Base URL for the API (e.g., `https://your-custom-api.com/v1`). |
-| `timeoutSec` | number | No | `120` | Request timeout in seconds. |
-| `promptTemplate` | textarea | No | — | Custom prompt template using `{{variable}}` syntax. Uses Paperclip's default agent prompt if omitted. |
+| `model` | text | Yes | — | Model identifier sent verbatim to the endpoint. |
+| `baseUrl` | text | Yes | — | Absolute `http`/`https` URL for the API (e.g. `https://api.your-provider.com/v1`). |
+| `apiKeyEnv` | text | No | — | Name of the server environment variable holding the API key. If omitted, falls back to the injected Paperclip auth token. |
+| `requestTimeoutMs` | number | No | `30000` | Request timeout in milliseconds. |
+| `extraHeaders` | object | No | — | Additional HTTP headers sent with each request. |
+| `promptTemplate` | textarea | No | Paperclip default | Custom prompt template using `{{variable}}` syntax (e.g. `{{agent.name}}`, `{{runId}}`, `{{context}}`). Uses Paperclip's default agent prompt if omitted. |
+
+> **Security:** Never put raw API keys in adapter config. Use `apiKeyEnv` to reference a server environment variable instead.
 
 ## Supported Models
 
-The adapter includes these built-in model options:
-
-- `auto` (Auto - recommended) — Let the backend choose the model
-- `nemotron-3-120b` — Nemotron 3 120B
-- `dots3-note-preview` — Dots3 Note Preview
-
-You can add custom models by modifying the `models` export in `metadata.ts`.
+The adapter ships with no built-in model options (`models` is empty by default). Pass any model identifier via the `model` config field, or extend the `models` export in `src/metadata.ts` to populate the model selector in the Paperclip UI.
 
 ## Configuration Examples
 
@@ -54,10 +51,10 @@ You can add custom models by modifying the `models` export in `metadata.ts`.
 
 ```json
 {
-  "apiKey": "sk-your-custom-key",
-  "model": "auto",
   "endpointPath": "chat/completions",
-  "baseUrl": "https://api.your-provider.com/v1"
+  "model": "gpt-4o",
+  "baseUrl": "https://api.your-provider.com/v1",
+  "apiKeyEnv": "MY_API_KEY"
 }
 ```
 
@@ -65,10 +62,10 @@ You can add custom models by modifying the `models` export in `metadata.ts`.
 
 ```json
 {
-  "apiKey": "sk-ant-your-key",
-  "model": "claude-3-opus",
   "endpointPath": "messages",
-  "baseUrl": "https://api.anthropic.com/v1"
+  "model": "claude-3-opus",
+  "baseUrl": "https://api.anthropic.com/v1",
+  "apiKeyEnv": "ANTHROPIC_API_KEY"
 }
 ```
 
@@ -76,12 +73,77 @@ You can add custom models by modifying the `models` export in `metadata.ts`.
 
 ```json
 {
-  "apiKey": "sk-your-key",
-  "model": "gpt-4o",
   "endpointPath": "responses",
-  "baseUrl": "https://api.openai.com/v1"
+  "model": "gpt-4o",
+  "baseUrl": "https://api.openai.com/v1",
+  "apiKeyEnv": "OPENAI_API_KEY"
 }
 ```
+
+### With custom headers and prompt template
+
+```json
+{
+  "endpointPath": "chat/completions",
+  "model": "my-model",
+  "baseUrl": "https://api.local/v1",
+  "apiKeyEnv": "LOCAL_API_KEY",
+  "requestTimeoutMs": 60000,
+  "extraHeaders": {
+    "X-Custom-Header": "value"
+  },
+  "promptTemplate": "You are {{agent.name}}. Context: {{context}}"
+}
+```
+
+## Request Body Shapes
+
+Depending on `endpointPath`, the adapter sends one of the following bodies:
+
+**`chat/completions`**
+```json
+{
+  "model": "gpt-4o",
+  "messages": [{ "role": "user", "content": "<prompt>" }]
+}
+```
+
+**`responses`**
+```json
+{
+  "model": "gpt-4o",
+  "input": "<prompt>"
+}
+```
+
+**`messages` (Anthropic-compatible)**
+```json
+{
+  "model": "claude-3-opus",
+  "max_tokens": 4096,
+  "messages": [{ "role": "user", "content": "<prompt>" }]
+}
+```
+
+## Response Parsing
+
+The adapter extracts text from responses in this order per endpoint shape:
+
+- **chat/completions** — `choices[0].message.content` (falls back to legacy `choices[0].text`)
+- **responses** — `output_text` (falls back to `output[].content[].text`)
+- **messages** — `content[].text` (Anthropic content blocks)
+
+Token usage is read from `usage.prompt_tokens`/`usage.completion_tokens` (OpenAI) or `usage.input_tokens`/`usage.output_tokens` (Anthropic). Cached input tokens are captured when present.
+
+## Error Handling
+
+| Condition | Error Family |
+|-----------|--------------|
+| Network failure / unreachable endpoint | `transient_upstream` |
+| Request timeout | `transient_upstream` |
+| HTTP 401 / 403 | `provider_quota` |
+| HTTP 429 | `provider_quota` (retry delayed 60s) |
+| Other HTTP errors | `transient_upstream` |
 
 ## Environment Variables
 
@@ -89,7 +151,11 @@ The adapter respects these environment variables at runtime:
 
 | Variable | Description |
 |----------|-------------|
-| `DEFAULT_BASE_URL` | Default base URL if not specified in config |
+| `DEFAULT_BASE_URL` | Default base URL if `baseUrl` is not specified in config. |
+
+## CLI
+
+The package exports a CLI helper (`@paperclipai/custom-adapter/cli` or `./cli`) that pretty-prints provider stdout events, including assistant text (green), usage counts (blue), and provider errors (red).
 
 ## Development
 
@@ -99,12 +165,16 @@ The adapter respects these environment variables at runtime:
 npm run build
 ```
 
-### Type Check
+### Typecheck
 
 ```bash
 npm run typecheck
 ```
 
+### Test
+
+```bash
+npm run test
 ### Tests
 
 ```bash
